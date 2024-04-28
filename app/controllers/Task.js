@@ -1,59 +1,54 @@
-const UserModel = require("../model/user");
+const TaskModel = require("../model/task");
 
-// Create and Save a new user
+// Created Task
 exports.create = async (req, res) => {
-  if (
-    !req.body.email &&
-    !req.body.firstName &&
-    !req.body.lastName &&
-    !req.body.phone
-  ) {
+  if (!req.body.title && !req.body.priority && !req.body.userId) {
     res.status(400).send({ message: "Content can not be empty!" });
   }
-
-  const user = new UserModel({
-    email: req.body.email,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    phone: req.body.phone,
+  console.log(req.body.userId);
+  const task = new TaskModel({
+    title: req.body.title,
+    description: req.body.description,
+    priority: req.body.priority,
+    completed: "no",
+    user: req.body.userId,
   });
 
-  await user
+  await task
     .save()
     .then((data) => {
       res.send({
-        message: "User created successfully!!",
-        user: data,
+        message: "Task is created",
+        data,
       });
     })
     .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while creating user",
+      res.send(500).send({
+        message: err.message || "Some error occurred while Create task",
       });
     });
 };
 
 // Retrieve all users from db
-
 exports.findAll = async (req, res) => {
   try {
-    const user = await UserModel.find();
-    res.status(200).json(user);
+    const task = await TaskModel.find({}).populate("user");
+    res.status(200).json(task);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
-// Find a single User with an id
+// single Task
 exports.findOne = async (req, res) => {
   try {
-    const user = await UserModel.findOne({ email: req.params.email }).exec();
-    res.status(200).json(user);
+    const task = await TaskModel.findById(req.params.id).exec();
+    res.status(200).json(task);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-// Update a user by the id in the request
+// update task
 exports.update = async (req, res) => {
   if (!req.body) {
     res.status(400).send({
@@ -62,7 +57,7 @@ exports.update = async (req, res) => {
   }
 
   const id = req.params.id;
-  await UserModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+  await TaskModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
     .then((data) => {
       if (!data) {
         res.status(404).send({
@@ -78,9 +73,10 @@ exports.update = async (req, res) => {
       });
     });
 };
-// Delete a user with the specified id in the request
+
+// delete task
 exports.destroy = async (req, res) => {
-  await UserModel.findByIdAndDelete(req.params.id)
+  await TaskModal.findByIdAndDelete(req.params.id)
     .then((data) => {
       if (!data) {
         res.status(404).send({

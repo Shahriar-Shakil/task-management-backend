@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var scheme = new mongoose.Schema({
+var schema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -15,8 +15,9 @@ var scheme = new mongoose.Schema({
     default: "",
   },
   phone: String,
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
 });
 
-var user = new mongoose.model("User", Schema);
+var User = new mongoose.model("User", schema);
 
-model.exports = user;
+module.exports = User;
