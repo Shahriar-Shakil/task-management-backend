@@ -1,7 +1,10 @@
+const asyncHandler = require("express-async-handler");
+
 const TaskModel = require("../model/task");
 
 // Created Task
-exports.create = async (req, res) => {
+//@access private
+exports.create = asyncHandler(async (req, res) => {
   if (!req.body.title && !req.body.priority && !req.body.userId) {
     res.status(400).send({ message: "Content can not be empty!" });
   }
@@ -27,29 +30,35 @@ exports.create = async (req, res) => {
         message: err.message || "Some error occurred while Create task",
       });
     });
-};
+});
 
 // Retrieve all users from db
-exports.findAll = async (req, res) => {
+//@access private
+
+exports.findAll = asyncHandler(async (req, res) => {
   try {
     const task = await TaskModel.find({}).populate("user");
     res.status(200).json(task);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
-};
+});
 // single Task
-exports.findOne = async (req, res) => {
+//@access private
+
+exports.findOne = asyncHandler(async (req, res) => {
   try {
     const task = await TaskModel.findById(req.params.id).exec();
     res.status(200).json(task);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
-};
+});
 
 // update task
-exports.update = async (req, res) => {
+//@access private
+
+exports.update = asyncHandler(async (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Data to update can not be empty!",
@@ -72,10 +81,10 @@ exports.update = async (req, res) => {
         message: err.message,
       });
     });
-};
+});
 
 // delete task
-exports.destroy = async (req, res) => {
+exports.destroy = asyncHandler(async (req, res) => {
   await TaskModal.findByIdAndDelete(req.params.id)
     .then((data) => {
       if (!data) {
@@ -93,4 +102,4 @@ exports.destroy = async (req, res) => {
         message: err.message,
       });
     });
-};
+});
