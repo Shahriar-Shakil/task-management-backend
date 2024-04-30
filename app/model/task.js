@@ -6,7 +6,14 @@ const taskSchema = new mongoose.Schema(
   {
     title: { type: String },
     description: { type: String },
-    priority: { type: String, enum: priority, required: true },
+    priority: {
+      type: String,
+      enum: {
+        values: ["high", "medium", "low"],
+        message: "{VALUE} is not supported",
+      },
+      required: true,
+    },
     completed: Boolean,
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },

@@ -29,7 +29,6 @@ exports.register = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
   });
-  console.log(`User created ${user}`);
   if (user) {
     res.status(201).json({ _id: user.id, email: user.email });
   } else {
@@ -71,66 +70,66 @@ exports.currentUser = asyncHandler(async (req, res) => {
 
 // Retrieve all users from db
 
-exports.findAll = asyncHandler(async (req, res) => {
-  try {
-    const user = await UserModel.find();
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-});
-// Find a single User with an id
-exports.findOne = asyncHandler(async (req, res) => {
-  try {
-    const user = await UserModel.findOne({ email: req.params.email }).exec();
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-});
+// exports.findAll = asyncHandler(async (req, res) => {
+//   try {
+//     const user = await UserModel.find();
+//     res.status(200).json(user);
+//   } catch (error) {
+//     res.status(404).json({ message: error.message });
+//   }
+// });
+// // Find a single User with an id
+// exports.findOne = asyncHandler(async (req, res) => {
+//   try {
+//     const user = await UserModel.findOne({ email: req.params.email }).exec();
+//     res.status(200).json(user);
+//   } catch (error) {
+//     res.status(404).json({ message: error.message });
+//   }
+// });
 
-// Update a user by the id in the request
-exports.update = asyncHandler(async (req, res) => {
-  if (!req.body) {
-    res.status(400).send({
-      message: "Data to update can not be empty!",
-    });
-  }
+// // Update a user by the id in the request
+// exports.update = asyncHandler(async (req, res) => {
+//   if (!req.body) {
+//     res.status(400).send({
+//       message: "Data to update can not be empty!",
+//     });
+//   }
 
-  const id = req.params.id;
-  await UserModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-    .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `User not found.`,
-        });
-      } else {
-        res.send({ message: "User updated successfully." });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message,
-      });
-    });
-});
-// Delete a user with the specified id in the request
-exports.destroy = asyncHandler(async (req, res) => {
-  await UserModel.findByIdAndDelete(req.params.id)
-    .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `User not found.`,
-        });
-      } else {
-        res.send({
-          message: "User deleted successfully!",
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message,
-      });
-    });
-});
+//   const id = req.params.id;
+//   await UserModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+//     .then((data) => {
+//       if (!data) {
+//         res.status(404).send({
+//           message: `User not found.`,
+//         });
+//       } else {
+//         res.send({ message: "User updated successfully." });
+//       }
+//     })
+//     .catch((err) => {
+//       res.status(500).send({
+//         message: err.message,
+//       });
+//     });
+// });
+// // Delete a user with the specified id in the request
+// exports.destroy = asyncHandler(async (req, res) => {
+//   await UserModel.findByIdAndDelete(req.params.id)
+//     .then((data) => {
+//       if (!data) {
+//         res.status(404).send({
+//           message: `User not found.`,
+//         });
+//       } else {
+//         res.send({
+//           message: "User deleted successfully!",
+//         });
+//       }
+//     })
+//     .catch((err) => {
+//       res.status(500).send({
+//         message: err.message,
+//       });
+//     });
+// });

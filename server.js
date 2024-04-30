@@ -1,33 +1,26 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const dbConfig = require("./config/database.config.js");
-const mongoose = require("mongoose");
+const connectDb = require("./app/config/connectDb.js");
+
 const UserRoute = require("./app/routes/user.js");
 const TaskRoute = require("./app/routes/task.js");
+const errorHandler = require("./app/middleware/errorHandler");
 
+connectDb();
 const app = express();
+const port = process.env.PORT || 5000;
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
 
-mongoose.Promise = global.Promise;
-mongoose
-  .connect(dbConfig.url, {
-    useNewUrlParser: true,
-  })
-  .then(() => {
-    console.log("Databse Connected Successfully!!");
-  })
-  .catch((err) => {
-    console.log("Could not connect to the database", err);
-    process.exit();
-  });
 app.get("/", (req, res) => {
   res.json({ message: "hello task management app node express" });
 });
+
 app.use("/user", UserRoute);
 app.use("/task", TaskRoute);
+app.use(errorHandler);
 
-app.listen(3000, () => {
-  console.log("server is listening on port 3000");
+app.listen(port, () => {
+  console.log(`server is listening on port ${port}`);
 });

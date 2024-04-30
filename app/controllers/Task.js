@@ -5,101 +5,95 @@ const TaskModel = require("../model/task");
 // Created Task
 //@access private
 exports.create = asyncHandler(async (req, res) => {
-  if (!req.body.title && !req.body.priority && !req.body.userId) {
+  const { title, description, priority } = req.body;
+  if (!title || !priority) {
     res.status(400).send({ message: "Content can not be empty!" });
   }
-  console.log(req.body.userId);
-  const task = new TaskModel({
-    title: req.body.title,
-    description: req.body.description,
-    priority: req.body.priority,
+
+  const task = await TaskModel.create({
+    title: title,
+    description: description,
+    priority: priority,
     completed: "no",
-    user: req.body.userId,
+    user: req.user.id,
   });
 
-  await task
-    .save()
-    .then((data) => {
-      res.send({
-        message: "Task is created",
-        data,
-      });
-    })
-    .catch((err) => {
-      res.send(500).send({
-        message: err.message || "Some error occurred while Create task",
-      });
-    });
+  res.status(201).json(task);
+  // await task
+  //   .save()
+  //   .then((data) => {
+  //     res.status(201).json({
+  //       message: "Task is created",
+  //       data,
+  //     });
+  //   })
+  //   .catch((err) => {
+  // res.status(500).json({
+  //   message: err.message || "Some error occurred while Create task",
+  // });
+  //   });
 });
 
-// Retrieve all users from db
+// Retrieve all Task from db
 //@access private
 
 exports.findAll = asyncHandler(async (req, res) => {
-  try {
-    const task = await TaskModel.find({}).populate("user");
-    res.status(200).json(task);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+  const tasks = await TaskModel.find({ user: req.user.id });
+  if (!tasks) {
+    res.status(404);
+    throw new Error("Contact not found");
   }
+  res.status(200).json(tasks);
 });
+
 // single Task
 //@access private
-
 exports.findOne = asyncHandler(async (req, res) => {
-  try {
-    const task = await TaskModel.findById(req.params.id).exec();
-    res.status(200).json(task);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+  const tasks = await TaskModel.findById(req.params.id);
+  if (!tasks) {
+    res.status(404);
+    throw new Error("Contact not found");
   }
+  res.status(200).json(tasks);
 });
 
 // update task
 //@access private
 
 exports.update = asyncHandler(async (req, res) => {
-  if (!req.body) {
-    res.status(400).send({
-      message: "Data to update can not be empty!",
-    });
+  const task = await TaskModel.findById(req.params.id);
+  if (!task) {
+    res.status(404);
+    throw new Error("Task not found");
   }
 
-  const id = req.params.id;
-  await TaskModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-    .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `User not found.`,
-        });
-      } else {
-        res.send({ message: "User updated successfully." });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message,
-      });
-    });
+  if (task.user.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User don't have permission to update other user contacts");
+  }
+
+  const updatedContact = await TaskModel.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+
+  res.status(200).json(updatedContact);
 });
 
 // delete task
+//@access private
+
 exports.destroy = asyncHandler(async (req, res) => {
-  await TaskModal.findByIdAndDelete(req.params.id)
-    .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `User not found.`,
-        });
-      } else {
-        res.send({
-          message: "User deleted successfully!",
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message,
-      });
-    });
+  const task = await TaskModel.findById(req.params.id);
+  if (!task) {
+    res.status(404);
+    throw new Error("task not found");
+  }
+  if (task.user.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User don't have permission to Delete other user tasks");
+  }
+  await task.deleteOne({ _id: req.params.id });
+  res.status(200).json(task);
 });
