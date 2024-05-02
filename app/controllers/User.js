@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const UserModel = require("../model/user");
+const Blacklist = require("../model/blacklist.js");
 
 // register user
 // endpoint /user/register
@@ -59,6 +60,27 @@ exports.login = asyncHandler(async (req, res) => {
   } else {
     res.status(401).json({ message: "Email or Password is not valid" });
   }
+});
+// login user
+// endpoint /user/logout
+// access private
+exports.logout = asyncHandler(async (req, res) => {
+  let authHeader = req.headers.authorization || req.headers.Authorization;
+  let token = authHeader.split(" ")[1];
+  if (!token) res.status(204); // noContent
+  const checkIfBlackListed = await Blacklist.findOne({ token });
+  // if true, send a no content response.
+  if (checkIfBlackListed) {
+    res.status(204);
+  }
+  // otherwise blacklist token
+  await Blacklist.create({
+    token,
+  });
+
+  // await newBlacklist.save();
+  res.setHeader("Clear-Site-Data", '"cookies"');
+  res.status(200).json({ message: "You are logged out!" });
 });
 
 // login user

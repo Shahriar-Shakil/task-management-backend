@@ -33,6 +33,12 @@ const errorHandler = (err, req, res, next) => {
         message: err.message,
         stackTrace: err.stack,
       });
+    case constants.NO_CONTENT:
+      res.json({
+        title: "No Content",
+        message: err.message,
+        stackTrace: err.stack,
+      });
     default:
       console.log("No Error, All good !");
       break;

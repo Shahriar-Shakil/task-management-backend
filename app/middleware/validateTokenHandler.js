@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const Blacklist = require("../model/blacklist");
 
 const validateToken = asyncHandler(async (req, res, next) => {
   let token;
@@ -7,6 +8,13 @@ const validateToken = asyncHandler(async (req, res, next) => {
 
   if (authHeader && authHeader.startsWith("Bearer")) {
     token = authHeader.split(" ")[1];
+    // Check if that token is blacklisted
+    const checkIfBlacklisted = await Blacklist.findOne({ token: token });
+    if (checkIfBlacklisted) {
+      return res
+        .status(401)
+        .json({ message: "This session has expired. Please login" });
+    }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
       if (err) {
         res.status(401);
