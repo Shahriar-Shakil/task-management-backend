@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const UserModel = require("../model/user");
-const Blacklist = require("../model/blacklist.js");
 
 // register user
 // endpoint /user/register
@@ -56,7 +55,8 @@ exports.login = asyncHandler(async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ accessToken });
+    res.cookie("session", accessToken, { httpOnly: true });
+    res.status(200).json({ message: "Login successful" });
   } else {
     res.status(401).json({ message: "Email or Password is not valid" });
   }
@@ -65,20 +65,12 @@ exports.login = asyncHandler(async (req, res) => {
 // endpoint /user/logout
 // access private
 exports.logout = asyncHandler(async (req, res) => {
-  let authHeader = req.headers.authorization || req.headers.Authorization;
-  let token = authHeader.split(" ")[1];
+  let token = req.cookies?.session;
+
   if (!token) res.status(204); // noContent
-  const checkIfBlackListed = await Blacklist.findOne({ token });
-  // if true, send a no content response.
-  if (checkIfBlackListed) {
-    res.status(204);
-  }
-  // otherwise blacklist token
-  await Blacklist.create({
-    token,
-  });
 
   // await newBlacklist.save();
+  res.clearCookie("session");
   res.setHeader("Clear-Site-Data", '"cookies"');
   res.status(200).json({ message: "You are logged out!" });
 });
@@ -89,69 +81,3 @@ exports.logout = asyncHandler(async (req, res) => {
 exports.currentUser = asyncHandler(async (req, res) => {
   res.json(req.user);
 });
-
-// Retrieve all users from db
-
-// exports.findAll = asyncHandler(async (req, res) => {
-//   try {
-//     const user = await UserModel.find();
-//     res.status(200).json(user);
-//   } catch (error) {
-//     res.status(404).json({ message: error.message });
-//   }
-// });
-// // Find a single User with an id
-// exports.findOne = asyncHandler(async (req, res) => {
-//   try {
-//     const user = await UserModel.findOne({ email: req.params.email }).exec();
-//     res.status(200).json(user);
-//   } catch (error) {
-//     res.status(404).json({ message: error.message });
-//   }
-// });
-
-// // Update a user by the id in the request
-// exports.update = asyncHandler(async (req, res) => {
-//   if (!req.body) {
-//     res.status(400).send({
-//       message: "Data to update can not be empty!",
-//     });
-//   }
-
-//   const id = req.params.id;
-//   await UserModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-//     .then((data) => {
-//       if (!data) {
-//         res.status(404).send({
-//           message: `User not found.`,
-//         });
-//       } else {
-//         res.send({ message: "User updated successfully." });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: err.message,
-//       });
-//     });
-// });
-// // Delete a user with the specified id in the request
-// exports.destroy = asyncHandler(async (req, res) => {
-//   await UserModel.findByIdAndDelete(req.params.id)
-//     .then((data) => {
-//       if (!data) {
-//         res.status(404).send({
-//           message: `User not found.`,
-//         });
-//       } else {
-//         res.send({
-//           message: "User deleted successfully!",
-//         });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: err.message,
-//       });
-//     });
-// });

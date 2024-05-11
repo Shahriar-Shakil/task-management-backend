@@ -5,9 +5,13 @@ const connectDb = require("./app/config/connectDb.js");
 const UserRoute = require("./app/routes/user.js");
 const TaskRoute = require("./app/routes/task.js");
 const errorHandler = require("./app/middleware/errorHandler");
+const cookieParser = require("cookie-parser");
 
 connectDb();
 const app = express();
+
+app.use(cookieParser());
+
 const port = process.env.PORT || 5000;
 app.use(bodyParser.urlencoded({ extended: true }));
 

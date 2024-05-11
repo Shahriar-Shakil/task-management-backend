@@ -5,15 +5,14 @@ const TaskModel = require("../model/task");
 // Created Task
 //@access private
 exports.create = asyncHandler(async (req, res) => {
-  const { title, description, priority } = req.body;
-  if (!title || !priority) {
+  const { title, description } = req.body ?? {};
+  if (!title) {
     res.status(400).send({ message: "Content can not be empty!" });
   }
 
   const task = await TaskModel.create({
     title: title,
     description: description,
-    priority: priority,
     completed: "no",
     user: req.user.id,
   });
