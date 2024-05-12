@@ -6,16 +6,30 @@ const UserRoute = require("./app/routes/user.js");
 const TaskRoute = require("./app/routes/task.js");
 const errorHandler = require("./app/middleware/errorHandler");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const csrf = require("csrf-simple-origin");
+const session = require("express-session");
 
 connectDb();
 const app = express();
 
+const allowedOrigins = ["http://localhost:3000", "http://localhost:5000"];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 
-const port = process.env.PORT || 5000;
-app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
 
+// parse application/json
 app.use(bodyParser.json());
+
+const port = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {
   res.json({ message: "hello task management app node express" });

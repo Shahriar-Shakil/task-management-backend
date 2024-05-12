@@ -55,8 +55,8 @@ exports.login = asyncHandler(async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
-    res.cookie("session", accessToken, { httpOnly: true });
-    res.status(200).json({ message: "Login successful" });
+
+    res.status(200).json({ accessToken });
   } else {
     res.status(401).json({ message: "Email or Password is not valid" });
   }
@@ -65,8 +65,8 @@ exports.login = asyncHandler(async (req, res) => {
 // endpoint /user/logout
 // access private
 exports.logout = asyncHandler(async (req, res) => {
-  let token = req.cookies?.session;
-
+  let authHeader = req.headers.authorization || req.headers.Authorization;
+  let token = authHeader.split(" ")[1];
   if (!token) res.status(204); // noContent
 
   // await newBlacklist.save();
