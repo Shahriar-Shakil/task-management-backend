@@ -47,13 +47,14 @@ exports.login = asyncHandler(async (req, res) => {
   }
   const user = await UserModel.findOne({ email });
   //compare password
+  const expiresInDays = process.env.COOKIE_EXPIRATION_DAYS || "2d";
   if (user && (await bcrypt.compare(password, user.password))) {
     const accessToken = jwt.sign(
       {
         user: { username: user.username, email: user.email, id: user._id },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: expiresInDays }
     );
 
     res.status(200).json({ accessToken });
