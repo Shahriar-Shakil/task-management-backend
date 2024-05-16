@@ -37,7 +37,13 @@ exports.create = asyncHandler(async (req, res) => {
 //@access private
 
 exports.findAll = asyncHandler(async (req, res) => {
-  const tasks = await TaskModel.find({ user: req.user.id });
+  const { completed } = req.query;
+  let query = {};
+  if (completed && completed !== "all") {
+    query.completed = completed;
+  }
+  console.log(query);
+  const tasks = await TaskModel.find({ user: req.user.id }).where({ ...query });
   if (!tasks) {
     res.status(404);
     throw new Error("Contact not found");
