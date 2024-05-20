@@ -97,15 +97,15 @@ exports.update = asyncHandler(async (req, res) => {
 //@access private
 
 exports.destroy = asyncHandler(async (req, res) => {
-  const task = await TaskModel.findById(req.params.id);
-  if (!task) {
+  const deleteIds = req.body;
+  // Convert taskIds to MongoDB ObjectIds
+  if (!deleteIds || !deleteIds.length) {
     res.status(404);
-    throw new Error("task not found");
+    throw new Error("Need to provide ids");
   }
-  if (task.user.toString() !== req.user.id) {
-    res.status(403);
-    throw new Error("User don't have permission to Delete other user tasks");
-  }
-  await task.deleteOne({ _id: req.params.id });
-  res.status(200).json(task);
+  // const objectIds = deleteIds.map((id) => new ObjectId(id));
+
+  // console.log(objectIds);
+  const result = await TaskModel.deleteMany({ _id: { $in: deleteIds } });
+  res.status(200).json({ deletedCount: result.deletedCount });
 });
