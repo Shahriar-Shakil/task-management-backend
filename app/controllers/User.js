@@ -80,5 +80,5 @@ exports.logout = asyncHandler(async (req, res) => {
 // endpoint /user/current
 // access private
 exports.currentUser = asyncHandler(async (req, res) => {
-  res.json(req.user);
+  res.status(200).json(req.user);
 });
