@@ -42,6 +42,7 @@ exports.register = asyncHandler(async (req, res) => {
 // access public
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(400).send({ message: "All fields are mandatory" });
   }
@@ -68,11 +69,12 @@ exports.login = asyncHandler(async (req, res) => {
 exports.logout = asyncHandler(async (req, res) => {
   let authHeader = req.headers.authorization || req.headers.Authorization;
   let token = authHeader.split(" ")[1];
-  if (!token) res.status(204); // noContent
+  // res.send("Logged out");
+  // if (!token) res.status(204); // noContent
 
-  // await newBlacklist.save();
-  res.clearCookie("session");
-  res.setHeader("Clear-Site-Data", '"cookies"');
+  // // await newBlacklist.save();
+  // res.clearCookie("session");
+  // res.setHeader("Clear-Site-Data", '"cookies"');
   res.status(200).json({ message: "You are logged out!" });
 });
 

@@ -7,8 +7,6 @@ const TaskRoute = require("./app/routes/task.js");
 const errorHandler = require("./app/middleware/errorHandler");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const csrf = require("csrf-simple-origin");
-const session = require("express-session");
 
 connectDb();
 const app = express();
